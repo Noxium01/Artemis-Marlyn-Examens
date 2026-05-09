@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collège Artémis Marlyn – Portail des Examens</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#2962ff;--primary-dark:#0039cb;--bg:#eef2ff;
+  --text:#1a1a2e;--muted:#5c6278;--border:#c5cae9;
+  --success:#00c853;--danger:#f44336;
+  --shadow:0 4px 24px rgba(41,98,255,.10)
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* MOBILE TOGGLE */
+#app{width:100%;transition:all .3s}
+body.mobile-view{background:#333;display:flex;justify-content:center}
+body.mobile-view #app{max-width:390px;min-height:100vh;background:var(--bg);
+  box-shadow:0 0 50px rgba(0,0,0,.5);border-radius:40px;overflow:hidden;border:8px solid #111}
+#view-btn{position:fixed;bottom:14px;right:14px;width:38px;height:38px;border-radius:50%;
+  border:1.5px solid var(--border);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18);
+  cursor:pointer;font-size:16px;z-index:9999;display:flex;align-items:center;
+  justify-content:center;transition:transform .2s}
+#view-btn:hover{transform:scale(1.1)}
+
+/* HEADER */
+.site-header{background:linear-gradient(135deg,#1a237e 0%,#2962ff 60%,#448aff 100%);
+  color:#fff;padding:44px 20px;text-align:center;position:relative;overflow:hidden}
+.site-header::before{content:'';position:absolute;top:-50%;left:-20%;width:60%;height:200%;
+  background:rgba(255,255,255,.04);transform:rotate(-15deg);pointer-events:none}
+.site-header h1{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.site-header p{font-size:.92rem;font-weight:300;max-width:620px;margin:0 auto;opacity:.9;line-height:1.7}
+
+/* LOGIN */
+#login-section{display:flex;justify-content:center;padding:60px 20px}
+.login-card{background:#fff;border-radius:20px;padding:46px 38px;width:100%;max-width:460px;
+  box-shadow:var(--shadow);border:1px solid var(--border)}
+.login-card h2{text-align:center;font-family:'Playfair Display',serif;color:var(--primary);
+  font-size:1.8rem;margin-bottom:30px}
+
+/* FORMS */
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:.77rem;font-weight:600;color:var(--muted);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
+.form-group input,.form-group select{width:100%;padding:12px 14px;
+  border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;
+  font-size:.9rem;color:var(--text);transition:border-color .2s;background:#fff}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary)}
+
+/* BUTTONS */
+.btn{padding:12px 22px;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;
+  font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-block}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-w{width:100%}
+.btn-secondary{background:var(--bg);color:var(--primary);border:2px solid var(--primary)}
+.btn-secondary:hover{background:var(--primary);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{opacity:.85}
+.btn-sm{padding:6px 12px;font-size:.77rem;border-radius:8px}
+.error-msg{color:var(--danger);font-size:.8rem;text-align:center;margin-top:10px;min-height:16px}
+.m-error{color:var(--danger);font-size:.79rem;margin-bottom:8px;min-height:14px}
+
+/* DASHBOARD */
+#dashboard-section{display:none}
+.dash-topbar{background:#fff;padding:12px 22px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,.06);gap:10px;flex-wrap:wrap}
+.user-info{display:flex;align-items:center;gap:10px}
+.avatar{width:38px;height:38px;background:var(--primary);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+.u-name{font-weight:600;font-size:.9rem}
+.u-role{font-size:.72rem;color:var(--muted)}
+.dash-nav{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:12px;flex-wrap:wrap}
+.dash-nav button{padding:7px 15px;border:none;background:transparent;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:.81rem;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:all .2s}
+.dash-nav button.active{background:#fff;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.logout-btn{background:none;border:2px solid var(--border);color:var(--muted);padding:7px 14px;
+  border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.79rem;transition:all .2s}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger)}
+.dash-content{padding:22px 26px;max-width:1200px;margin:0 auto}
+
+/* LAYOUT */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.sec-hdr h2{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--text)}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;margin-bottom:22px}
+.stat-card{background:#fff;border-radius:14px;padding:18px;box-shadow:var(--shadow);text-align:center;border-top:4px solid var(--primary)}
+.stat-n{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--primary);font-weight:700}
+.stat-l{font-size:.72rem;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:15px}
+.card{background:#fff;border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card h3{font-size:.94rem;font-weight:600;margin-bottom:5px}
+.card p{font-size:.81rem;color:var(--muted);margin-bottom:3px}
+.card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* TABLE */
+.tbl-wrap{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
+.tbl-wrap+.tbl-wrap{margin-top:16px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--primary);color:#fff;padding:12px 14px;text-align:left;
+  font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+td{padding:11px 14px;border-bottom:1px solid #f0f4ff;font-size:.84rem}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8f9ff}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:600}
+.b-admin{background:#e8eaf6;color:#3949ab}
+.b-proviseur{background:#e0f7fa;color:#00838f}
+.b-professeur{background:#e8f5e9;color:#2e7d32}
+.b-eleve{background:#fff3e0;color:#e65100}
+.b-ok{background:#e8f5e9;color:#2e7d32}
+.b-err{background:#ffebee;color:#c62828}
+.code-badge{font-family:monospace;font-size:.9rem;font-weight:700;
+  background:#1a237e;color:#fff;padding:4px 10px;border-radius:8px;letter-spacing:2px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;padding:30px;width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+.modal-wide{max-width:680px}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.28rem;margin-bottom:18px;color:var(--text)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* EXAM BUILDER */
+.add-q-box{background:var(--bg);border-radius:12px;padding:15px;margin-bottom:12px}
+.q-item{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid var(--primary)}
+.q-txt{font-weight:600;margin-bottom:5px;font-size:.87rem}
+.q-meta{display:flex;align-items:center;gap:8px;font-size:.79rem;flex-wrap:wrap}
+.q-type-tag{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.5px}
+.tag-vf{background:#e0f7fa;color:#00838f}
+.tag-qcm{background:#e8eaf6;color:#3949ab}
+.choix-item{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.choix-item span{flex:1;padding:6px 11px;background:#f0f4ff;border-radius:8px;font-size:.83rem}
+
+/* EXAM TAKING */
+.exam-container{max-width:680px}
+.exam-q-block{background:#fff;border-radius:14px;padding:18px;margin-bottom:12px;
+  box-shadow:var(--shadow);border:1px solid var(--border)}
+.q-num{font-size:.73rem;font-weight:700;color:var(--primary);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.exam-q-txt{font-weight:600;font-size:.93rem;margin-bottom:12px}
+.ans-row{display:flex;gap:8px;flex-wrap:wrap}
+.ans-btn{padding:10px 18px;border-radius:10px;border:2px solid var(--border);background:#fff;
+  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.83rem;
+  transition:all .15s;text-align:left}
+.ans-btn:hover{border-color:var(--primary);background:#f0f4ff}
+.ans-sel{background:#e8eaf6;border-color:var(--primary);color:var(--primary)}
+.ans-true{background:#e8f5e9;border-color:var(--success);color:#2e7d32}
+.ans-false{background:#ffebee;border-color:var(--danger);color:#c62828}
+
+/* CODE INPUT */
+.code-input-wrap{background:#fff;border-radius:20px;padding:36px;max-width:460px;
+  margin:0 auto;box-shadow:var(--shadow);border:1px solid var(--border);text-align:center}
+.code-input-wrap h3{font-family:'Playfair Display',serif;font-size:1.35rem;margin-bottom:8px}
+.code-input-wrap p{font-size:.83rem;color:var(--muted);margin-bottom:22px}
+.code-row{display:flex;gap:10px}
+.code-row input{flex:1;padding:13px 14px;border:2px solid var(--border);border-radius:12px;
+  font-family:monospace;font-size:1.1rem;font-weight:700;letter-spacing:3px;
+  text-align:center;text-transform:uppercase;transition:border-color .2s}
+.code-row input:focus{outline:none;border-color:var(--primary)}
+.code-err{font-size:.81rem;margin-top:10px;min-height:16px}
+
+/* RESULT */
+.score-big{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--primary);font-weight:700}
+.result-box{background:#fff;border-radius:16px;padding:32px;text-align:center;
+  box-shadow:var(--shadow);max-width:380px;margin:40px auto 0}
+.result-score{font-family:'Playfair Display',serif;font-size:3rem;color:var(--primary);font-weight:700}
+.result-label{font-size:.83rem;color:var(--muted);margin-top:4px}
+
+/* MISC */
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty .ico{font-size:3rem;margin-bottom:12px}
+input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--primary)}
+
+@media(max-width:700px){
+  .site-header h1{font-size:1.5rem}
+  .dash-topbar{padding:10px 12px}
+  .dash-content{padding:12px}
+  .login-card{padding:26px 16px}
+  .code-input-wrap{padding:24px 14px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header class="site-header">
+  <h1>Collège Artémis Marlyn</h1>
+  <p>Bienvenue sur le portail des examens du Collège Artémis Marlyn. Retrouvez ici vos épreuves, résultats, convocations et informations importantes concernant les examens de l'année scolaire.</p>
+</header>
+
+<section id="login-section">
+  <div class="login-card">
+    <h2>Connexion</h2>
+    <div class="form-group">
+      <label>Nom d'utilisateur</label>
+      <input type="text" id="l-user" placeholder="Entrez votre identifiant" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" id="l-pass" placeholder="Entrez votre mot de passe" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-w" onclick="doLogin()">Se connecter</button>
+    <p class="error-msg" id="l-err"></p>
+  </div>
+</section>
+
+<section id="dashboard-section">
+  <div class="dash-topbar">
+    <div class="user-info">
+      <div class="avatar" id="d-avatar"></div>
+      <div>
+        <div class="u-name" id="d-name"></div>
+        <div class="u-role" id="d-role"></div>
+      </div>
+    </div>
+    <nav class="dash-nav" id="d-nav"></nav>
+    <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+  </div>
+  <div class="dash-content" id="d-content"></div>
+</section>
+
+</div>
+
+<div class="modal-overlay" id="m-overlay" onclick="overlayClick(event)">
+  <div class="modal" id="m-box"></div>
+</div>
+
+<button id="view-btn" onclick="toggleView()" title="Vue mobile">📱</button>
+
+<script>
+// ══ DB ══════════════════════════════════════════
+let db={users:[],classes:[],exams:[],submissions:[]};
+let me=null, tab=0;
+
+function loadDB(){
+  const s=localStorage.getItem('cam3');
+  if(s) db=JSON.parse(s);
+  if(!db.users.find(u=>u.role==='admin')){
+    db.users.push({id:uid(),username:'admin',password:'admin',role:'admin',nom:'Administrateur',prenom:''});
+    save();
+  }
+}
+function save(){ localStorage.setItem('cam3',JSON.stringify(db)); }
+function uid(){ return '_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function genCode(){
+  let c;
+  do{ c=Math.random().toString(36).slice(2,8).toUpperCase(); }
+  while(db.exams.find(e=>e.code===c));
+  return c;
+}
+
+// ══ AUTH ════════════════════════════════════════
+function doLogin(){
+  const u=V('l-user'),p=V('l-pass');
+  const user=db.users.find(x=>x.username===u&&x.password===p);
+  if(!user){ S('l-err','Identifiants incorrects.'); return; }
+  me=user; sessionStorage.setItem('s',JSON.stringify(user)); showDash();
+}
+function doLogout(){
+  me=null; sessionStorage.removeItem('s');
+  show('login-section','flex'); hide('dashboard-section');
+  S('l-user',''); S('l-pass',''); S('l-err','');
+}
+
+// ══ DASHBOARD ═══════════════════════════════════
+const TABS={
+  admin:['Utilisateurs','Classes','Examens','Résultats'],
+  proviseur:['Classes','Comptes','Examens','Résultats'],
+  professeur:['Mes Examens','Créer un Examen','Résultats'],
+  eleve:['Entrer un Code','Mes Résultats']
+};
+const RL={admin:'Administrateur',proviseur:'Proviseur',professeur:'Professeur',eleve:'Élève'};
+
+function showDash(){
+  show('dashboard-section','block'); hide('login-section');
+  const init=((me.prenom||'')[0]||(me.nom||'')[0]||me.username[0]).toUpperCase();
+  S('d-avatar',init);
+  S('d-name',[me.prenom,me.nom].filter(Boolean).join(' ')||me.username);
+  S('d-role',RL[me.role]||me.role);
+  G('d-nav').innerHTML=(TABS[me.role]||[]).map((t,i)=>`<button onclick="go(${i})" id="tb${i}">${t}</button>`).join('');
+  go(0);
+}
+function go(i){
+  tab=i;
+  (TABS[me.role]||[]).forEach((_,j)=>{ const b=G('tb'+j); if(b) b.classList.toggle('active',j===i); });
+  ({admin:rAdmin,proviseur:rProv,professeur:rProf,eleve:rEleve}[me.role]||Function())(i);
+}
+
+// ══ ADMIN ════════════════════════════════════════
+function rAdmin(i){
+  const c=G('d-content');
+  if(i===0){
+    c.innerHTML=`<div class="sec-hdr"><h2>Utilisateurs</h2>
+      <button class="btn btn-primary btn-sm" onclick="mCreateUser(['admin','proviseur','professeur','eleve'])">+ Créer</button>
+    </div>
+    <div class="stats-row">
+      ${['proviseur','professeur','eleve'].map(r=>`<div class="stat-card">
+        <div class="stat-n">${db.users.filter(u=>u.role===r).length}</div>
+        <div class="stat-l">${RL[r]}s</div></div>`).join('')}
+      <div class="stat-card"><div class="stat-n">${db.users.length}</div><div class="stat-l">Total</div></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Nom</th><th>Prénom</th><th>Identifiant</th><th>Rôle</th><th>Actions</th></tr></thead>
+      <tbody>${db.users.map(u=>`<tr>
+        <td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td>
+        <td><span class="badge b-${u.role}">${RL[u.role]||u.role}</span></td>
+        <td>${u.id!==me.id?`<button class="btn btn-danger btn-sm" onclick="delUser('${u.id}')">Supprimer</button>`:''}</td>
+      </tr>`).join('')}</tbody></table></div>`;
+  } else if(i===1){
+    c.innerHTML=`<div class="sec-hdr"><h2>Classes</h2></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Classe</th><th>Élèves</th></tr></thead>
+      <tbody>${db.classes.length===0?'<tr><td colspan="2" style="text-align:center;color:#aaa">Aucune classe</td></tr>':
+        db.classes.map(cl=>`<tr><td>${cl.nom}</td><td>${cl.studentIds.length}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  } else if(i===2){
+    c.innerHTML=''; rExamsTable(c,db.exams,true,true);
+  } else { rAllResults(c); }
+}
+
+// ══ PROVISEUR ════════════════════════════════════
+function rProv(i){
+  const c=G('d-content');
+  if(i===0){
+    c.innerHTML=`<div class="sec-hdr"><h2>Classes</h2>
+      <button class="btn btn-primary btn-sm" onclick="mCreateClass()">+ Créer une classe</button>
+    </div>
+    <div class="cards-grid">${db.classes.length===0?'<p style="color:#aaa">Aucune classe.</p>':
+      db.classes.map(cl=>`<div class="card"><h3>📚 ${cl.nom}</h3><p>${cl.studentIds.length} élève(s)</p>
+        <div class="card-actions">
+          <button class="btn btn-secondary btn-sm" onclick="mManageClass('${cl.id}')">Gérer les élèves</button>
+          <button class="btn btn-danger btn-sm" onclick="delClass('${cl.id}')">Supprimer</button>
+        </div></div>`).join('')}
+    </div>`;
+  } else if(i===1){
+    const profs=db.users.filter(u=>u.role==='professeur');
+    const eleves=db.users.filter(u=>u.role==='eleve');
+    c.innerHTML=`<div class="sec-hdr"><h2>Comptes</h2>
+      <button class="btn btn-primary btn-sm" onclick="mCreateUser(['professeur','eleve'])">+ Créer un compte</button>
+    </div>
+    <p style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Professeurs (${profs.length})</p>
+    <div class="tbl-wrap" style="margin-bottom:18px"><table>
+      <thead><tr><th>Nom</th><th>Prénom</th><th>Identifiant</th><th>Actions</th></tr></thead>
+      <tbody>${profs.length===0?'<tr><td colspan="4" style="text-align:center;color:#aaa">Aucun professeur</td></tr>':
+        profs.map(u=>`<tr><td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="delUser('${u.id}')">Supprimer</button></td></tr>`).join('')}
+      </tbody></table></div>
+    <p style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Élèves (${eleves.length})</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Nom</th><th>Prénom</th><th>Identifiant</th><th>Classe</th><th>Actions</th></tr></thead>
+      <tbody>${eleves.length===0?'<tr><td colspan="5" style="text-align:center;color:#aaa">Aucun élève</td></tr>':
+        eleves.map(u=>{ const cl=db.classes.find(c=>c.studentIds.includes(u.id));
+          return `<tr><td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td>
+          <td>${cl?cl.nom:'<span style="color:#aaa">—</span>'}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="delUser('${u.id}')">Supprimer</button></td></tr>`;}).join('')}
+      </tbody></table></div>`;
+  } else if(i===2){
+    c.innerHTML=''; rExamsTable(c,db.exams,true,false);
+  } else { rAllResults(c); }
+}
+
+// ══ PROFESSEUR ═══════════════════════════════════
+function rProf(i){
+  const c=G('d-content');
+  const myEx=db.exams.filter(e=>e.profId===me.id);
+  const today=new Date().toISOString().slice(0,10);
+
+  if(i===0){
+    c.innerHTML=`<div class="sec-hdr"><h2>Mes Examens</h2>
+      <button class="btn btn-primary btn-sm" onclick="go(1)">+ Créer un examen</button>
+    </div>`;
+    if(myEx.length===0){ c.innerHTML+=`<div class="empty"><div class="ico">📝</div><p>Aucun examen créé.</p></div>`; return; }
+    c.innerHTML+=`<div class="tbl-wrap"><table>
+      <thead><tr><th>Titre</th><th>Code</th><th>Classe</th><th>Questions</th><th>Rendus</th><th>Date limite</th><th>Statut</th><th></th></tr></thead>
+      <tbody>${myEx.map(e=>{
+        const cl=db.classes.find(c=>c.id===e.classId);
+        const exp=e.deadline<today;
+        const subs=db.submissions.filter(s=>s.examId===e.id).length;
+        return `<tr>
+          <td><strong>${e.titre}</strong></td>
+          <td><span class="code-badge">${e.code}</span></td>
+          <td>${cl?cl.nom:'—'}</td>
+          <td>${e.questions.length}</td>
+          <td>${subs}</td>
+          <td>${e.deadline}</td>
+          <td><span class="badge ${exp?'b-err':'b-ok'}">${exp?'Expiré':'Actif'}</span></td>
+          <td><button class="btn btn-danger btn-sm" onclick="delExam('${e.id}')">✕</button></td>
+        </tr>`;}).join('')}
+      </tbody></table></div>`;
+  } else if(i===1){
+    window._qs=[]; window._choix=[];
+    c.innerHTML=`<div class="sec-hdr"><h2>Créer un Examen</h2></div>
+    <div class="card" style="max-width:720px">
+      <div style="display:grid;grid-template-columns:1fr;gap:0">
+        <div class="form-group"><label>Titre de l'examen</label>
+          <input type="text" id="ex-titre" placeholder="Ex : Contrôle de mathématiques"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>Classe</label><select id="ex-class">
+          <option value="">-- Sélectionner --</option>
+          ${db.classes.map(cl=>`<option value="${cl.id}">${cl.nom}</option>`).join('')}
+        </select></div>
+        <div class="form-group"><label>Date limite</label>
+          <input type="date" id="ex-dead" min="${today}"></div>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:6px 0 16px">
+      <p style="font-weight:700;font-size:.88rem;margin-bottom:12px">➕ Ajouter une question</p>
+      <div class="add-q-box">
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;align-items:end;margin-bottom:10px">
+          <div class="form-group" style="margin:0">
+            <label>Type</label>
+            <select id="nq-type" onchange="switchQType()">
+              <option value="vf">Vrai / Faux</option>
+              <option value="qcm">QCM</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Énoncé de la question</label>
+            <input type="text" id="nq-txt" placeholder="Tapez votre question...">
+          </div>
+        </div>
+        <!-- VF -->
+        <div id="vf-sec">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Bonne réponse</label>
+            <select id="nq-vf" style="width:auto;min-width:140px">
+              <option value="true">✅ Vrai</option>
+              <option value="false">❌ Faux</option>
+            </select>
+          </div>
+        </div>
+        <!-- QCM -->
+        <div id="qcm-sec" style="display:none">
+          <label style="display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Choix de réponses</label>
+          <div id="choix-list"></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="new-choix" placeholder="Ajouter un choix..."
+              style="flex:1;padding:8px 12px;border:2px solid var(--border);border-radius:9px;font-family:inherit;font-size:.83rem"
+              onkeydown="if(event.key==='Enter') addChoix()">
+            <button class="btn btn-secondary btn-sm" onclick="addChoix()">+ Ajouter</button>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Bonne réponse</label>
+            <select id="nq-correct"><option value="">-- sélectionner --</option></select>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="addQ()">✔ Valider la question</button>
+      </div>
+      <div id="q-list" style="margin-bottom:10px"></div>
+      <p id="ex-err" class="m-error"></p>
+      <button class="btn btn-primary" onclick="saveExam()">💾 Enregistrer l'examen</button>
+    </div>`;
+  } else {
+    c.innerHTML=`<div class="sec-hdr"><h2>Résultats</h2></div>`;
+    if(myEx.length===0){ c.innerHTML+=`<div class="empty"><div class="ico">📊</div><p>Aucun examen.</p></div>`; return; }
+    myEx.forEach(ex=>{
+      const subs=db.submissions.filter(s=>s.examId===ex.id);
+      const cl=db.classes.find(c=>c.id===ex.classId);
+      c.innerHTML+=`<div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <h3 style="margin:0">${ex.titre}</h3>
+          <span class="code-badge">${ex.code}</span>
+          <span style="font-size:.8rem;color:var(--muted)">Classe : ${cl?cl.nom:'—'} · ${subs.length} rendu(s)</span>
+        </div>
+        ${subs.length===0?'<p style="color:#aaa;font-size:.81rem">Aucune copie rendue.</p>':`
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Élève</th><th>Note</th><th>Date</th></tr></thead>
+          <tbody>${subs.map(s=>{const st=db.users.find(u=>u.id===s.studentId);
+            return `<tr><td>${st?st.nom+' '+st.prenom:'—'}</td>
+            <td><span class="score-big">${s.score}/${s.total}</span></td>
+            <td>${s.date}</td></tr>`;}).join('')}
+          </tbody></table></div>`}
+      </div>`;
+    });
+  }
+}
+
+// ══ ÉLÈVE ════════════════════════════════════════
+function rEleve(i){
+  const c=G('d-content');
+  if(i===0){
+    c.innerHTML=`
+    <div class="code-input-wrap">
+      <div style="font-size:2.5rem;margin-bottom:10px">🔑</div>
+      <h3>Entrer un code d'examen</h3>
+      <p>Saisissez le code fourni par votre professeur.</p>
+      <div class="code-row">
+        <input type="text" id="exam-code" placeholder="AB1234" maxlength="6"
+          onkeydown="if(event.key==='Enter') enterCode()">
+        <button class="btn btn-primary" onclick="enterCode()">Accéder</button>
+      </div>
+      <p class="code-err" id="code-err"></p>
+    </div>`;
+  } else {
+    c.innerHTML=`<div class="sec-hdr"><h2>Mes Résultats</h2></div>`;
+    const subs=db.submissions.filter(s=>s.studentId===me.id);
+    if(subs.length===0){ c.innerHTML+=`<div class="empty"><div class="ico">📊</div><p>Aucun résultat.</p></div>`; return; }
+    c.innerHTML+=`<div class="tbl-wrap"><table>
+      <thead><tr><th>Examen</th><th>Code</th><th>Note</th><th>Date</th></tr></thead>
+      <tbody>${subs.map(s=>{
+        const ex=db.exams.find(e=>e.id===s.examId);
+        return `<tr><td>${ex?ex.titre:'—'}</td>
+        <td>${ex?`<span class="code-badge">${ex.code}</span>`:'—'}</td>
+        <td><span class="score-big">${s.score}/${s.total}</span></td>
+        <td>${s.date}</td></tr>`;}).join('')}
+      </tbody></table></div>`;
+  }
+}
+
+function enterCode(){
+  const code=V('exam-code').trim().toUpperCase();
+  const err=G('code-err');
+  err.style.color='var(--danger)';
+  if(!code){ err.textContent='Entrez un code.'; return; }
+  const ex=db.exams.find(e=>e.code===code);
+  if(!ex){ err.textContent='Code invalide.'; return; }
+  const today=new Date().toISOString().slice(0,10);
+  if(ex.deadline<today){ err.textContent='Cet examen est expiré.'; return; }
+  const done=db.submissions.find(s=>s.examId===ex.id&&s.studentId===me.id);
+  if(done){
+    err.style.color='var(--success)';
+    err.textContent=`Déjà rendu — Note : ${done.score}/${done.total}`;
+    return;
+  }
+  startExam(ex);
+}
+
+function startExam(ex){
+  window._tid=ex.id; window._ta={};
+  const c=G('d-content');
+  c.innerHTML=`
+  <div class="exam-container">
+    <div class="sec-hdr">
+      <h2>📝 ${ex.titre}</h2>
+      <span class="code-badge">${ex.code}</span>
+    </div>
+    <p style="color:var(--muted);font-size:.81rem;margin-bottom:18px">
+      ${ex.questions.length} question(s) · Limite : ${ex.deadline}
+    </p>
+    ${ex.questions.map((q,i)=>`
+    <div class="exam-q-block">
+      <div class="q-num">
+        Question ${i+1}/${ex.questions.length}
+        <span class="q-type-tag ${q.type==='vf'?'tag-vf':'tag-qcm'}">${q.type==='vf'?'Vrai/Faux':'QCM'}</span>
+      </div>
+      <div class="exam-q-txt">${q.enonce}</div>
+      <div class="ans-row">
+        ${q.type==='vf'
+          ? `<button class="ans-btn" id="a-${q.id}-T" onclick="pickAns('${q.id}',true,'vf')">✅ Vrai</button>
+             <button class="ans-btn" id="a-${q.id}-F" onclick="pickAns('${q.id}',false,'vf')">❌ Faux</button>`
+          : q.choix.map(ch=>`<button class="ans-btn" id="a-${q.id}-${ch.id}"
+              onclick="pickAns('${q.id}','${ch.id}','qcm',[${q.choix.map(x=>`'${x.id}'`).join(',')}])"
+              >${ch.texte}</button>`).join('')
+        }
+      </div>
+    </div>`).join('')}
+    <p id="te-err" class="m-error" style="text-align:center"></p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-secondary" onclick="go(0)">← Retour</button>
+      <button class="btn btn-primary" onclick="submitExam()">Soumettre l'examen</button>
+    </div>
+  </div>`;
+}
+
+function pickAns(qid,val,type,allIds){
+  window._ta[qid]=val;
+  if(type==='vf'){
+    G('a-'+qid+'-T').className='ans-btn'+(val===true?' ans-true':'');
+    G('a-'+qid+'-F').className='ans-btn'+(val===false?' ans-false':'');
+  } else {
+    allIds.forEach(id=>{ const b=G('a-'+qid+'-'+id); if(b) b.className='ans-btn'+(val===id?' ans-sel':''); });
+  }
+}
+
+function submitExam(){
+  const ex=db.exams.find(e=>e.id===window._tid);
+  const missing=ex.questions.filter(q=>window._ta[q.id]===undefined).length;
+  if(missing){ G('te-err').textContent=`${missing} question(s) sans réponse.`; return; }
+  const correct=ex.questions.filter(q=>window._ta[q.id]===q.reponse).length;
+  db.submissions.push({id:uid(),examId:ex.id,studentId:me.id,
+    score:correct,total:ex.questions.length,date:new Date().toISOString().slice(0,10)});
+  save();
+  const c=G('d-content');
+  c.innerHTML=`
+  <div class="result-box">
+    <div style="font-size:2.5rem;margin-bottom:10px">🎉</div>
+    <div class="result-score">${correct} / ${ex.questions.length}</div>
+    <div class="result-label" style="margin-bottom:20px">Votre note pour "${ex.titre}"</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" onclick="go(0)">← Nouvel examen</button>
+      <button class="btn btn-primary btn-sm" onclick="go(1)">Mes résultats</button>
+    </div>
+  </div>`;
+}
+
+// ══ HELPERS ══════════════════════════════════════
+function rExamsTable(c,exams,showProf,canDel){
+  const today=new Date().toISOString().slice(0,10);
+  c.innerHTML+=`<div class="sec-hdr"><h2>Examens (${exams.length})</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Titre</th><th>Code</th>${showProf?'<th>Professeur</th>':''}
+      <th>Classe</th><th>Q.</th><th>Date limite</th><th>Statut</th>${canDel?'<th></th>':''}
+    </tr></thead>
+    <tbody>${exams.length===0?`<tr><td colspan="8" style="text-align:center;color:#aaa">Aucun examen</td></tr>`:
+      exams.map(e=>{
+        const cl=db.classes.find(c=>c.id===e.classId);
+        const prof=db.users.find(u=>u.id===e.profId);
+        const exp=e.deadline<today;
+        return `<tr>
+          <td>${e.titre}</td>
+          <td><span class="code-badge">${e.code||'—'}</span></td>
+          ${showProf?`<td>${prof?prof.nom+' '+prof.prenom:'—'}</td>`:''}
+          <td>${cl?cl.nom:'—'}</td>
+          <td>${e.questions.length}</td>
+          <td>${e.deadline}</td>
+          <td><span class="badge ${exp?'b-err':'b-ok'}">${exp?'Expiré':'Actif'}</span></td>
+          ${canDel?`<td><button class="btn btn-danger btn-sm" onclick="delExam('${e.id}')">Supprimer</button></td>`:''}
+        </tr>`;}).join('')}
+    </tbody></table></div>`;
+}
+function rAllResults(c){
+  c.innerHTML=`<div class="sec-hdr"><h2>Tous les Résultats</h2></div>`;
+  if(!db.submissions.length){ c.innerHTML+=`<div class="empty"><div class="ico">📊</div><p>Aucun résultat.</p></div>`; return; }
+  c.innerHTML+=`<div class="tbl-wrap"><table>
+    <thead><tr><th>Élève</th><th>Examen</th><th>Code</th><th>Note</th><th>Date</th></tr></thead>
+    <tbody>${db.submissions.map(s=>{
+      const st=db.users.find(u=>u.id===s.studentId);
+      const ex=db.exams.find(e=>e.id===s.examId);
+      return `<tr><td>${st?st.nom+' '+st.prenom:'—'}</td>
+      <td>${ex?ex.titre:'—'}</td>
+      <td>${ex?`<span class="code-badge">${ex.code}</span>`:'—'}</td>
+      <td><span class="score-big">${s.score}/${s.total}</span></td>
+      <td>${s.date}</td></tr>`;}).join('')}
+    </tbody></table></div>`;
+}
+
+// ══ MODALS ════════════════════════════════════════
+function openModal(html,wide){
+  const b=G('m-box'); b.className='modal'+(wide?' modal-wide':''); b.innerHTML=html;
+  G('m-overlay').classList.add('open');
+}
+function closeModal(){ G('m-overlay').classList.remove('open'); }
+function overlayClick(e){ if(e.target===G('m-overlay')) closeModal(); }
+
+function mCreateUser(roles){
+  openModal(`<h3>Créer un compte</h3>
+    <div class="form-group"><label>Rôle</label><select id="m-role">
+      ${roles.map(r=>`<option value="${r}">${RL[r]}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Nom</label><input type="text" id="m-nom" placeholder="Nom de famille"></div>
+    <div class="form-group"><label>Prénom</label><input type="text" id="m-prenom" placeholder="Prénom"></div>
+    <div class="form-group"><label>Identifiant</label><input type="text" id="m-user" placeholder="Login de connexion"></div>
+    <div class="form-group"><label>Mot de passe</label><input type="password" id="m-pass"></div>
+    <p id="m-err" class="m-error"></p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="doCreateUser()">Créer</button>
+    </div>`);
+}
+function doCreateUser(){
+  const role=V('m-role'),nom=V('m-nom').trim(),prenom=V('m-prenom').trim();
+  const username=V('m-user').trim(),password=V('m-pass');
+  if(!nom||!prenom||!username||!password){ S('m-err','Tous les champs sont requis.'); return; }
+  if(db.users.find(u=>u.username===username)){ S('m-err','Identifiant déjà utilisé.'); return; }
+  db.users.push({id:uid(),username,password,role,nom,prenom});
+  save(); closeModal(); go(tab);
+}
+function delUser(id){
+  if(!confirm('Supprimer cet utilisateur ?')) return;
+  db.users=db.users.filter(u=>u.id!==id);
+  db.classes.forEach(c=>{ c.studentIds=c.studentIds.filter(s=>s!==id); });
+  save(); go(tab);
+}
+
+function mCreateClass(){
+  openModal(`<h3>Créer une classe</h3>
+    <div class="form-group"><label>Nom de la classe</label>
+      <input type="text" id="m-cnom" placeholder="Ex : 3ème A"></div>
+    <p id="m-err" class="m-error"></p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="doCreateClass()">Créer</button>
+    </div>`);
+}
+function doCreateClass(){
+  const nom=V('m-cnom').trim();
+  if(!nom){ S('m-err','Nom requis.'); return; }
+  if(db.classes.find(c=>c.nom===nom)){ S('m-err','Classe déjà existante.'); return; }
+  db.classes.push({id:uid(),nom,studentIds:[]});
+  save(); closeModal(); go(tab);
+}
+function delClass(id){
+  if(!confirm('Supprimer cette classe ?')) return;
+  db.classes=db.classes.filter(c=>c.id!==id);
+  save(); go(tab);
+}
+
+function mManageClass(cid){
+  const cl=db.classes.find(c=>c.id===cid);
+  const all=db.users.filter(u=>u.role==='eleve');
+  openModal(`<h3>Classe : ${cl.nom}</h3>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:14px">Cochez les élèves à inclure dans cette classe.</p>
+    <div style="max-height:270px;overflow-y:auto">
+      ${all.length===0?'<p style="color:#aaa">Aucun élève créé.</p>':
+      all.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0">
+        <input type="checkbox" id="cs-${s.id}" ${cl.studentIds.includes(s.id)?'checked':''}>
+        <label for="cs-${s.id}" style="cursor:pointer">${s.nom} ${s.prenom}
+          <span style="color:#aaa">(${s.username})</span></label>
+      </div>`).join('')}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="doManageClass('${cid}')">Enregistrer</button>
+    </div>`);
+}
+function doManageClass(cid){
+  const all=db.users.filter(u=>u.role==='eleve');
+  const ids=all.map(s=>s.id);
+  db.classes.forEach(c=>{ c.studentIds=c.studentIds.filter(sid=>!ids.includes(sid)); });
+  db.classes.find(c=>c.id===cid).studentIds=all.filter(s=>G('cs-'+s.id)?.checked).map(s=>s.id);
+  save(); closeModal(); go(tab);
+}
+
+// ══ EXAM BUILDER ═════════════════════════════════
+function switchQType(){
+  const t=V('nq-type');
+  G('vf-sec').style.display=t==='vf'?'':'none';
+  G('qcm-sec').style.display=t==='qcm'?'':'none';
+}
+function addChoix(){
+  const txt=V('new-choix').trim(); if(!txt) return;
+  window._choix=window._choix||[];
+  window._choix.push({id:uid(),texte:txt});
+  S('new-choix',''); renderChoix();
+}
+function removeChoix(i){ window._choix.splice(i,1); renderChoix(); }
+function renderChoix(){
+  const el=G('choix-list'); if(!el) return;
+  el.innerHTML=(window._choix||[]).map((ch,i)=>`
+    <div class="choix-item">
+      <span>${ch.texte}</span>
+      <button class="btn btn-danger btn-sm" onclick="removeChoix(${i})">✕</button>
+    </div>`).join('');
+  const sel=G('nq-correct'); if(!sel) return;
+  const curr=sel.value;
+  sel.innerHTML='<option value="">-- sélectionner --</option>'+
+    (window._choix||[]).map(ch=>`<option value="${ch.id}"${ch.id===curr?' selected':''}>${ch.texte}</option>`).join('');
+}
+function addQ(){
+  const txt=V('nq-txt').trim(), type=V('nq-type');
+  const err=G('ex-err');
+  if(!txt){ err.textContent='Énoncé requis.'; return; }
+  window._qs=window._qs||[];
+  if(type==='vf'){
+    window._qs.push({id:uid(),enonce:txt,type:'vf',reponse:V('nq-vf')==='true'});
+  } else {
+    if(!(window._choix&&window._choix.length>=2)){ err.textContent='Minimum 2 choix pour un QCM.'; return; }
+    const rep=V('nq-correct');
+    if(!rep){ err.textContent='Sélectionnez la bonne réponse.'; return; }
+    window._qs.push({id:uid(),enonce:txt,type:'qcm',choix:[...window._choix],reponse:rep});
+    window._choix=[]; renderChoix();
+  }
+  err.textContent=''; S('nq-txt',''); rQList();
+}
+function removeQ(i){ window._qs.splice(i,1); rQList(); }
+function rQList(){
+  const el=G('q-list'); if(!el) return;
+  el.innerHTML=(window._qs||[]).map((q,i)=>`
+    <div class="q-item">
+      <div style="display:flex;gap:8px;align-items:start;margin-bottom:5px">
+        <span class="q-type-tag ${q.type==='vf'?'tag-vf':'tag-qcm'}" style="flex-shrink:0;margin-top:2px">${q.type==='vf'?'V/F':'QCM'}</span>
+        <span class="q-txt" style="margin:0">${i+1}. ${q.enonce}</span>
+      </div>
+      <div class="q-meta">
+        <span style="color:var(--muted)">✔ Réponse :
+          <strong style="color:var(--primary)">${q.type==='vf'?(q.reponse?'Vrai':'Faux'):(q.choix.find(c=>c.id===q.reponse)||{texte:'?'}).texte}</strong>
+        </span>
+        ${q.type==='qcm'?`<span style="color:#aaa">[${q.choix.map(c=>c.texte).join(' / ')}]</span>`:''}
+        <button class="btn btn-danger btn-sm" onclick="removeQ(${i})">✕</button>
+      </div>
+    </div>`).join('');
+}
+function saveExam(){
+  const titre=V('ex-titre').trim(),cid=V('ex-class'),dead=V('ex-dead');
+  const err=G('ex-err');
+  if(!titre){ err.textContent='Titre requis.'; return; }
+  if(!cid){ err.textContent='Classe requise.'; return; }
+  if(!dead){ err.textContent='Date limite requise.'; return; }
+  if(!(window._qs&&window._qs.length)){ err.textContent='Ajoutez au moins une question.'; return; }
+  const code=genCode();
+  db.exams.push({id:uid(),code,titre,profId:me.id,classId:cid,deadline:dead,questions:[...window._qs]});
+  save(); window._qs=[];
+  alert(`✅ Examen créé !\n\nCode à donner aux élèves : ${code}`);
+  go(0);
+}
+function delExam(id){
+  if(!confirm('Supprimer cet examen et ses résultats ?')) return;
+  db.exams=db.exams.filter(e=>e.id!==id);
+  db.submissions=db.submissions.filter(s=>s.examId!==id);
+  save(); go(tab);
+}
+
+// ══ VIEW TOGGLE ═══════════════════════════════════
+let mobileMode=false;
+function toggleView(){
+  mobileMode=!mobileMode;
+  document.body.classList.toggle('mobile-view',mobileMode);
+  G('view-btn').textContent=mobileMode?'🖥️':'📱';
+  G('view-btn').title=mobileMode?'Vue PC':'Vue mobile';
+}
+
+// ══ DOM UTILS ═════════════════════════════════════
+function G(id){ return document.getElementById(id); }
+function V(id){ const e=G(id); return e?e.value:''; }
+function S(id,v){ const e=G(id); if(!e) return; if(e.tagName==='INPUT'||e.tagName==='TEXTAREA') e.value=v; else e.textContent=v; }
+function show(id,d){ G(id).style.display=d||'block'; }
+function hide(id){ G(id).style.display='none'; }
+
+// ══ INIT ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  loadDB();
+  const s=sessionStorage.getItem('s');
+  if(s){ const sv=JSON.parse(s); const fr=db.users.find(u=>u.id===sv.id);
+    if(fr){ me=fr; showDash(); } else doLogout(); }
+  ['l-pass','l-user'].forEach(id=>G(id).addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); }));
+});
+</script>
+</body>
+</html>
+<!-- Fait & dev par Atyx, tout droit reserver -->
