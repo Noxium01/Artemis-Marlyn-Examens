@@ -16,29 +16,28 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 /* MOBILE TOGGLE */
-#app{width:100%;transition:all .3s}
+#app{width:100%}
 body.mobile-view{background:#333;display:flex;justify-content:center}
 body.mobile-view #app{max-width:390px;min-height:100vh;background:var(--bg);
   box-shadow:0 0 50px rgba(0,0,0,.5);border-radius:40px;overflow:hidden;border:8px solid #111}
 #view-btn{position:fixed;bottom:14px;right:14px;width:38px;height:38px;border-radius:50%;
   border:1.5px solid var(--border);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18);
-  cursor:pointer;font-size:16px;z-index:9999;display:flex;align-items:center;
-  justify-content:center;transition:transform .2s}
+  cursor:pointer;font-size:16px;z-index:9999;display:flex;align-items:center;justify-content:center;transition:transform .2s}
 #view-btn:hover{transform:scale(1.1)}
 
 /* LOADING */
 #loading-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a237e,#2962ff);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   z-index:9998;color:#fff;gap:16px}
-#loading-screen h2{font-family:'Playfair Display',serif;font-size:1.5rem;opacity:.9}
+#loading-screen h2{font-family:'Playfair Display',serif;font-size:1.4rem;opacity:.9}
 .spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.3);
   border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading-screen.hidden{display:none}
 
 /* SETUP BANNER */
-#setup-banner{background:#ff6f00;color:#fff;padding:12px 24px;text-align:center;
-  font-size:.85rem;font-weight:500;display:none}
+#setup-banner{background:#e65100;color:#fff;padding:11px 20px;text-align:center;
+  font-size:.83rem;font-weight:500;display:none;line-height:1.5}
 #setup-banner.show{display:block}
 
 /* HEADER */
@@ -201,15 +200,13 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--pr
 <body oncontextmenu="return false">
 <div id="app">
 
-<!-- LOADING -->
 <div id="loading-screen">
   <div class="spinner"></div>
   <h2>Chargement…</h2>
 </div>
 
-<!-- SETUP BANNER -->
 <div id="setup-banner">
-  ⚠️ Firebase non configuré — les données sont locales à votre navigateur. Ajoutez votre config Firebase dans le code.
+  ⚠️ JSONBin non configuré — données locales uniquement. Remplis JSONBIN_KEY et JSONBIN_BIN dans le code.
 </div>
 
 <header class="site-header">
@@ -228,7 +225,7 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--pr
       <label>Mot de passe</label>
       <input type="password" id="l-pass" placeholder="Entrez votre mot de passe" autocomplete="current-password">
     </div>
-    <button class="btn btn-primary btn-w" onclick="doLogin()">Se connecter</button>
+    <button class="btn btn-primary btn-w" id="login-btn" onclick="doLogin()">Se connecter</button>
     <p class="error-msg" id="l-err"></p>
   </div>
 </section>
@@ -256,73 +253,81 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--pr
 
 <button id="view-btn" onclick="toggleView()" title="Vue mobile">📱</button>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 // ══════════════════════════════════════════════════════════════
-//  CONFIGURATION FIREBASE
+//  CONFIGURATION JSONBIN
 //  ─────────────────────────────────────────────────────────────
-//  1. Allez sur https://console.firebase.google.com
-//  2. Créez un projet (ou utilisez un existant)
-//  3. Ajoutez une app Web → copiez la config ci-dessous
-//  4. Dans "Build > Realtime Database" → Créer la base
-//  5. Règles → copiez ceci et publiez :
-//     { "rules": { ".read": true, ".write": true } }
-//  6. Déployez votre index.html sur GitHub Pages
+//  1. Créer un compte gratuit sur https://jsonbin.io
+//  2. Dashboard → API Keys → copier la "Master Key"
+//  3. Bins → Create Bin → mettre {} comme contenu → Create
+//  4. Copier le Bin ID (ex: 64f3a8b2c4e3d12a58b9c01f)
+//  5. Coller ci-dessous et push sur GitHub
 // ══════════════════════════════════════════════════════════════
-const FIREBASE_CONFIG = {
-  apiKey:            "VOTRE_API_KEY",
-  authDomain:        "VOTRE_PROJET.firebaseapp.com",
-  databaseURL:       "https://VOTRE_PROJET-default-rtdb.firebaseio.com",
-  projectId:         "VOTRE_PROJET_ID",
-  storageBucket:     "VOTRE_PROJET.appspot.com",
-  messagingSenderId: "VOTRE_SENDER_ID",
-  appId:             "VOTRE_APP_ID"
-};
+const JSONBIN_KEY = '$2a$10$VOTRE_MASTER_KEY_ICI';
+const JSONBIN_BIN = 'VOTRE_BIN_ID_ICI';
 // ══════════════════════════════════════════════════════════════
 
-const FB_READY = !FIREBASE_CONFIG.apiKey.startsWith('VOTRE');
+const JB_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`;
+const JB_HEADERS = { 'Content-Type': 'application/json', 'X-Access-Key': JSONBIN_KEY };
+const JB_READY = !JSONBIN_KEY.includes('VOTRE') && !JSONBIN_BIN.includes('VOTRE');
 
-let fbDB = null;
 let db = {users:[], classes:[], exams:[], submissions:[]};
 let me = null, tab = 0;
 
-// ── Helpers Firebase ──────────────────────────────────────────
-function toObj(arr){
-  return arr.reduce((acc,item)=>{ acc[item.id]=item; return acc; }, {});
-}
-function fromSnap(data){
-  return data ? Object.values(data) : [];
-}
-
+// ── DB ────────────────────────────────────────────────────────
 async function loadDB(){
-  if(!FB_READY){
+  if(!JB_READY){
     const s=localStorage.getItem('cam_local');
     if(s) db=JSON.parse(s);
     G('setup-banner').classList.add('show');
     ensureAdmin(); return;
   }
   try{
-    firebase.initializeApp(FIREBASE_CONFIG);
-    fbDB=firebase.database();
-    const snap=await fbDB.ref('/').once('value');
-    const data=snap.val()||{};
-    db={
-      users:      fromSnap(data.users),
-      classes:    fromSnap(data.classes),
-      exams:      fromSnap(data.exams),
-      submissions:fromSnap(data.submissions)
-    };
+    const res=await fetch(JB_URL+'/latest',{headers:{'X-Access-Key':JSONBIN_KEY}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.record && typeof data.record==='object'){
+      db={
+        users:      data.record.users      || [],
+        classes:    data.record.classes    || [],
+        exams:      data.record.exams      || [],
+        submissions:data.record.submissions|| []
+      };
+    }
     ensureAdmin();
   }catch(e){
-    console.warn('Firebase error, fallback local',e);
+    console.warn('JSONBin load error:',e);
     const s=localStorage.getItem('cam_local');
     if(s) db=JSON.parse(s);
     G('setup-banner').classList.add('show');
     ensureAdmin();
   }
+}
+
+function save(){
+  const payload=JSON.stringify(db);
+  if(JB_READY){
+    fetch(JB_URL,{method:'PUT',headers:JB_HEADERS,body:payload})
+      .catch(e=>console.warn('JSONBin save error:',e));
+  } else {
+    localStorage.setItem('cam_local',payload);
+  }
+}
+
+async function freshLoad(){
+  if(!JB_READY) return;
+  try{
+    const res=await fetch(JB_URL+'/latest',{headers:{'X-Access-Key':JSONBIN_KEY}});
+    const data=await res.json();
+    if(data.record){
+      db={
+        users:      data.record.users      || [],
+        classes:    data.record.classes    || [],
+        exams:      data.record.exams      || [],
+        submissions:data.record.submissions|| []
+      };
+    }
+  }catch(e){ console.warn('JSONBin refresh error:',e); }
 }
 
 function ensureAdmin(){
@@ -332,36 +337,9 @@ function ensureAdmin(){
   }
 }
 
-function save(){
-  if(fbDB){
-    fbDB.ref('/').set({
-      users:toObj(db.users),classes:toObj(db.classes),
-      exams:toObj(db.exams),submissions:toObj(db.submissions)
-    });
-  } else {
-    localStorage.setItem('cam_local',JSON.stringify(db));
-  }
-}
-
-// ── Reload fresh data before each login check ─────────────────
-async function freshLoad(){
-  if(!fbDB) return;
-  const snap=await fbDB.ref('/').once('value');
-  const data=snap.val()||{};
-  db={
-    users:      fromSnap(data.users),
-    classes:    fromSnap(data.classes),
-    exams:      fromSnap(data.exams),
-    submissions:fromSnap(data.submissions)
-  };
-}
-
-// ── Utils ──────────────────────────────────────────────────────
+// ── UTILS ─────────────────────────────────────────────────────
 function uid(){ return 'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function genCode(){
-  let c; do{ c=Math.random().toString(36).slice(2,8).toUpperCase(); }
-  while(db.exams.find(e=>e.code===c)); return c;
-}
+function genCode(){ let c; do{ c=Math.random().toString(36).slice(2,8).toUpperCase(); }while(db.exams.find(e=>e.code===c)); return c; }
 function G(id){ return document.getElementById(id); }
 function V(id){ const e=G(id); return e?e.value:''; }
 function S(id,v){ const e=G(id); if(!e)return; e.tagName==='INPUT'||e.tagName==='TEXTAREA'?e.value=v:e.textContent=v; }
@@ -370,10 +348,10 @@ function hide(id){ G(id).style.display='none'; }
 
 // ── AUTH ──────────────────────────────────────────────────────
 async function doLogin(){
-  const btn=document.querySelector('#login-section .btn');
+  const btn=G('login-btn');
   btn.textContent='Vérification…'; btn.disabled=true;
-  await freshLoad(); // pull latest users from Firebase
-  const u=V('l-user'), p=V('l-pass');
+  await freshLoad();
+  const u=V('l-user').trim().toLowerCase(), p=V('l-pass');
   const user=db.users.find(x=>x.username===u&&x.password===p);
   btn.textContent='Se connecter'; btn.disabled=false;
   if(!user){ S('l-err','Identifiants incorrects.'); return; }
@@ -437,8 +415,7 @@ function rAdmin(i){
       <tbody>${db.classes.length===0?'<tr><td colspan="2" style="text-align:center;color:#aaa">Aucune classe</td></tr>':
         db.classes.map(cl=>`<tr><td>${cl.nom}</td><td>${cl.studentIds.length}</td></tr>`).join('')}
       </tbody></table></div>`;
-  } else if(i===2){
-    c.innerHTML=''; rExamsTable(c,db.exams,true,true);
+  } else if(i===2){ c.innerHTML=''; rExamsTable(c,db.exams,true,true);
   } else { rAllResults(c); }
 }
 
@@ -454,8 +431,7 @@ function rProv(i){
         <div class="card-actions">
           <button class="btn btn-secondary btn-sm" onclick="mManageClass('${cl.id}')">Gérer les élèves</button>
           <button class="btn btn-danger btn-sm" onclick="delClass('${cl.id}')">Supprimer</button>
-        </div></div>`).join('')}
-    </div>`;
+        </div></div>`).join('')}</div>`;
   } else if(i===1){
     const profs=db.users.filter(u=>u.role==='professeur');
     const eleves=db.users.filter(u=>u.role==='eleve');
@@ -465,21 +441,20 @@ function rProv(i){
     <p style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Professeurs (${profs.length})</p>
     <div class="tbl-wrap" style="margin-bottom:18px"><table>
       <thead><tr><th>Nom</th><th>Prénom</th><th>Identifiant</th><th>Actions</th></tr></thead>
-      <tbody>${profs.length===0?'<tr><td colspan="4" style="text-align:center;color:#aaa">Aucun professeur</td></tr>':
+      <tbody>${profs.length===0?'<tr><td colspan="4" style="text-align:center;color:#aaa">Aucun</td></tr>':
         profs.map(u=>`<tr><td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td>
         <td><button class="btn btn-danger btn-sm" onclick="delUser('${u.id}')">Supprimer</button></td></tr>`).join('')}
       </tbody></table></div>
     <p style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Élèves (${eleves.length})</p>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Nom</th><th>Prénom</th><th>Identifiant</th><th>Classe</th><th>Actions</th></tr></thead>
-      <tbody>${eleves.length===0?'<tr><td colspan="5" style="text-align:center;color:#aaa">Aucun élève</td></tr>':
+      <tbody>${eleves.length===0?'<tr><td colspan="5" style="text-align:center;color:#aaa">Aucun</td></tr>':
         eleves.map(u=>{ const cl=db.classes.find(c=>c.studentIds.includes(u.id));
           return `<tr><td>${u.nom}</td><td>${u.prenom}</td><td>${u.username}</td>
           <td>${cl?cl.nom:'<span style="color:#aaa">—</span>'}</td>
           <td><button class="btn btn-danger btn-sm" onclick="delUser('${u.id}')">Supprimer</button></td></tr>`;}).join('')}
       </tbody></table></div>`;
-  } else if(i===2){
-    c.innerHTML=''; rExamsTable(c,db.exams,true,false);
+  } else if(i===2){ c.innerHTML=''; rExamsTable(c,db.exams,true,false);
   } else { rAllResults(c); }
 }
 
@@ -518,8 +493,7 @@ function rProf(i){
           <option value="">-- Sélectionner --</option>
           ${db.classes.map(cl=>`<option value="${cl.id}">${cl.nom}</option>`).join('')}
         </select></div>
-        <div class="form-group"><label>Date limite</label>
-          <input type="date" id="ex-dead" min="${today}"></div>
+        <div class="form-group"><label>Date limite</label><input type="date" id="ex-dead" min="${today}"></div>
       </div>
       <hr style="border:none;border-top:1px solid var(--border);margin:6px 0 16px">
       <p style="font-weight:700;font-size:.88rem;margin-bottom:12px">➕ Ajouter une question</p>
@@ -566,8 +540,7 @@ function rProf(i){
       const cl=db.classes.find(c=>c.id===ex.classId);
       c.innerHTML+=`<div class="card" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-          <h3 style="margin:0">${ex.titre}</h3>
-          <span class="code-badge">${ex.code}</span>
+          <h3 style="margin:0">${ex.titre}</h3><span class="code-badge">${ex.code}</span>
           <span style="font-size:.8rem;color:var(--muted)">Classe : ${cl?cl.nom:'—'} · ${subs.length} rendu(s)</span>
         </div>
         ${subs.length===0?'<p style="color:#aaa;font-size:.81rem">Aucune copie rendue.</p>':`
@@ -619,12 +592,12 @@ async function enterCode(){
   const err=G('code-err');
   err.style.color='var(--danger)';
   if(!code){ err.textContent='Entrez un code.'; return; }
-  // Reload fresh data to get latest exams
+  err.textContent='Vérification…'; err.style.color='var(--muted)';
   await freshLoad();
   const ex=db.exams.find(e=>e.code===code);
-  if(!ex){ err.textContent='Code invalide.'; return; }
+  if(!ex){ err.style.color='var(--danger)'; err.textContent='Code invalide.'; return; }
   const today=new Date().toISOString().slice(0,10);
-  if(ex.deadline<today){ err.textContent='Cet examen est expiré.'; return; }
+  if(ex.deadline<today){ err.style.color='var(--danger)'; err.textContent='Cet examen est expiré.'; return; }
   const done=db.submissions.find(s=>s.examId===ex.id&&s.studentId===me.id);
   if(done){ err.style.color='var(--success)'; err.textContent=`Déjà rendu — Note : ${done.score}/${done.total}`; return; }
   startExam(ex);
@@ -636,8 +609,7 @@ function startExam(ex){
   c.innerHTML=`
   <div class="exam-container">
     <div class="sec-hdr"><h2>📝 ${ex.titre}</h2><span class="code-badge">${ex.code}</span></div>
-    <p style="color:var(--muted);font-size:.81rem;margin-bottom:18px">
-      ${ex.questions.length} question(s) · Limite : ${ex.deadline}</p>
+    <p style="color:var(--muted);font-size:.81rem;margin-bottom:18px">${ex.questions.length} question(s) · Limite : ${ex.deadline}</p>
     ${ex.questions.map((q,i)=>`
     <div class="exam-q-block">
       <div class="q-num">Question ${i+1}/${ex.questions.length}
@@ -743,7 +715,7 @@ function mCreateUser(roles){
       ${roles.map(r=>`<option value="${r}">${RL[r]}</option>`).join('')}</select></div>
     <div class="form-group"><label>Nom</label><input type="text" id="m-nom" placeholder="Nom de famille"></div>
     <div class="form-group"><label>Prénom</label><input type="text" id="m-prenom" placeholder="Prénom"></div>
-    <div class="form-group"><label>Identifiant de connexion</label><input type="text" id="m-user" placeholder="Login unique"></div>
+    <div class="form-group"><label>Identifiant de connexion</label><input type="text" id="m-user" placeholder="Ex : jean.dupont"></div>
     <div class="form-group"><label>Mot de passe</label><input type="password" id="m-pass"></div>
     <p id="m-err" class="m-error"></p>
     <div class="modal-footer">
@@ -839,8 +811,7 @@ function renderChoix(){
     (window._choix||[]).map(ch=>`<option value="${ch.id}"${ch.id===curr?' selected':''}>${ch.texte}</option>`).join('');
 }
 function addQ(){
-  const txt=V('nq-txt').trim(), type=V('nq-type');
-  const err=G('ex-err');
+  const txt=V('nq-txt').trim(), type=V('nq-type'), err=G('ex-err');
   if(!txt){ err.textContent='Énoncé requis.'; return; }
   window._qs=window._qs||[];
   if(type==='vf'){
@@ -871,8 +842,7 @@ function rQList(){
     </div>`).join('');
 }
 function saveExam(){
-  const titre=V('ex-titre').trim(),cid=V('ex-class'),dead=V('ex-dead');
-  const err=G('ex-err');
+  const titre=V('ex-titre').trim(),cid=V('ex-class'),dead=V('ex-dead'), err=G('ex-err');
   if(!titre){ err.textContent='Titre requis.'; return; }
   if(!cid){ err.textContent='Classe requise.'; return; }
   if(!dead){ err.textContent='Date limite requise.'; return; }
@@ -900,46 +870,35 @@ function toggleView(){
 
 // ── ANTI DEVTOOLS ─────────────────────────────────────────────
 document.addEventListener('keydown',function(e){
-  // F12
   if(e.key==='F12'||e.keyCode===123){ e.preventDefault(); e.stopPropagation(); return false; }
-  // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
-  if(e.ctrlKey&&e.shiftKey&&['I','i','J','j','C','c'].includes(e.key)){ e.preventDefault(); e.stopPropagation(); return false; }
-  // Ctrl+U (view source)
-  if(e.ctrlKey&&(e.key==='u'||e.key==='U')){ e.preventDefault(); e.stopPropagation(); return false; }
-  // Ctrl+S (save source)
-  if(e.ctrlKey&&(e.key==='s'||e.key==='S')){ e.preventDefault(); return false; }
+  if(e.ctrlKey&&e.shiftKey&&['I','i','J','j','C','c','K','k'].includes(e.key)){ e.preventDefault(); e.stopPropagation(); return false; }
+  if(e.ctrlKey&&['u','U','s','S'].includes(e.key)){ e.preventDefault(); return false; }
 },true);
 
-// Devtools size detection — blur page if opened
-(function devtoolsDetect(){
+(function(){
   const threshold=160;
   setInterval(()=>{
-    const wDiff=window.outerWidth-window.innerWidth;
-    const hDiff=window.outerHeight-window.innerHeight;
-    if(wDiff>threshold||hDiff>threshold){
-      document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;font-size:1.2rem;color:#c62828">⛔ Accès aux outils de développement interdit.</div>';
+    if(window.outerWidth-window.innerWidth>threshold||window.outerHeight-window.innerHeight>threshold){
+      document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#c62828;font-size:1.1rem;text-align:center;padding:20px">⛔ Accès aux outils de développement interdit pendant l\'examen.</div>';
     }
   },800);
 })();
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async ()=>{
-  G('loading-screen').classList.remove('hidden');
   await loadDB();
   G('loading-screen').classList.add('hidden');
 
   const s=sessionStorage.getItem('s');
   if(s){
-    const sv=JSON.parse(s);
-    // Always reload fresh user from DB (ensures deleted accounts can't log back in)
     await freshLoad();
+    const sv=JSON.parse(s);
     const fresh=db.users.find(u=>u.id===sv.id);
     if(fresh){ me=fresh; showDash(); }
     else { sessionStorage.removeItem('s'); show('login-section','flex'); }
   } else {
     show('login-section','flex');
   }
-
   ['l-pass','l-user'].forEach(id=>G(id).addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); }));
 });
 </script>
