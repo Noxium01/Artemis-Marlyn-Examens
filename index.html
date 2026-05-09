@@ -6,7 +6,7 @@
 <title>Collège Artémis Marlyn – Portail des Examens</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;user-select:none}
 :root{
   --primary:#2962ff;--primary-dark:#0039cb;--bg:#eef2ff;
   --text:#1a1a2e;--muted:#5c6278;--border:#c5cae9;
@@ -25,6 +25,21 @@ body.mobile-view #app{max-width:390px;min-height:100vh;background:var(--bg);
   cursor:pointer;font-size:16px;z-index:9999;display:flex;align-items:center;
   justify-content:center;transition:transform .2s}
 #view-btn:hover{transform:scale(1.1)}
+
+/* LOADING */
+#loading-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a237e,#2962ff);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9998;color:#fff;gap:16px}
+#loading-screen h2{font-family:'Playfair Display',serif;font-size:1.5rem;opacity:.9}
+.spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-screen.hidden{display:none}
+
+/* SETUP BANNER */
+#setup-banner{background:#ff6f00;color:#fff;padding:12px 24px;text-align:center;
+  font-size:.85rem;font-weight:500;display:none}
+#setup-banner.show{display:block}
 
 /* HEADER */
 .site-header{background:linear-gradient(135deg,#1a237e 0%,#2962ff 60%,#448aff 100%);
@@ -77,8 +92,7 @@ body.mobile-view #app{max-width:390px;min-height:100vh;background:var(--bg);
 .u-role{font-size:.72rem;color:var(--muted)}
 .dash-nav{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:12px;flex-wrap:wrap}
 .dash-nav button{padding:7px 15px;border:none;background:transparent;border-radius:8px;
-  font-family:'DM Sans',sans-serif;font-size:.81rem;font-weight:500;color:var(--muted);
-  cursor:pointer;transition:all .2s}
+  font-family:'DM Sans',sans-serif;font-size:.81rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s}
 .dash-nav button.active{background:#fff;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .logout-btn{background:none;border:2px solid var(--border);color:var(--muted);padding:7px 14px;
   border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.79rem;transition:all .2s}
@@ -100,7 +114,6 @@ body.mobile-view #app{max-width:390px;min-height:100vh;background:var(--bg);
 
 /* TABLE */
 .tbl-wrap{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
-.tbl-wrap+.tbl-wrap{margin-top:16px}
 table{width:100%;border-collapse:collapse}
 th{background:var(--primary);color:#fff;padding:12px 14px;text-align:left;
   font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
@@ -125,18 +138,16 @@ tr:hover td{background:#f8f9ff}
 .modal-overlay.open{display:flex}
 .modal{background:#fff;border-radius:20px;padding:30px;width:100%;max-width:520px;
   max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.22)}
-.modal-wide{max-width:680px}
+.modal-wide{max-width:700px}
 .modal h3{font-family:'Playfair Display',serif;font-size:1.28rem;margin-bottom:18px;color:var(--text)}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
-.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
 
 /* EXAM BUILDER */
 .add-q-box{background:var(--bg);border-radius:12px;padding:15px;margin-bottom:12px}
 .q-item{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid var(--primary)}
 .q-txt{font-weight:600;margin-bottom:5px;font-size:.87rem}
 .q-meta{display:flex;align-items:center;gap:8px;font-size:.79rem;flex-wrap:wrap}
-.q-type-tag{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:20px;
-  text-transform:uppercase;letter-spacing:.5px}
+.q-type-tag{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
 .tag-vf{background:#e0f7fa;color:#00838f}
 .tag-qcm{background:#e8eaf6;color:#3949ab}
 .choix-item{display:flex;gap:8px;align-items:center;margin-bottom:6px}
@@ -151,8 +162,7 @@ tr:hover td{background:#f8f9ff}
 .exam-q-txt{font-weight:600;font-size:.93rem;margin-bottom:12px}
 .ans-row{display:flex;gap:8px;flex-wrap:wrap}
 .ans-btn{padding:10px 18px;border-radius:10px;border:2px solid var(--border);background:#fff;
-  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.83rem;
-  transition:all .15s;text-align:left}
+  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.83rem;transition:all .15s}
 .ans-btn:hover{border-color:var(--primary);background:#f0f4ff}
 .ans-sel{background:#e8eaf6;border-color:var(--primary);color:var(--primary)}
 .ans-true{background:#e8f5e9;border-color:var(--success);color:#2e7d32}
@@ -168,14 +178,12 @@ tr:hover td{background:#f8f9ff}
   font-family:monospace;font-size:1.1rem;font-weight:700;letter-spacing:3px;
   text-align:center;text-transform:uppercase;transition:border-color .2s}
 .code-row input:focus{outline:none;border-color:var(--primary)}
-.code-err{font-size:.81rem;margin-top:10px;min-height:16px}
 
 /* RESULT */
 .score-big{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--primary);font-weight:700}
 .result-box{background:#fff;border-radius:16px;padding:32px;text-align:center;
   box-shadow:var(--shadow);max-width:380px;margin:40px auto 0}
 .result-score{font-family:'Playfair Display',serif;font-size:3rem;color:var(--primary);font-weight:700}
-.result-label{font-size:.83rem;color:var(--muted);margin-top:4px}
 
 /* MISC */
 .empty{text-align:center;padding:50px 20px;color:var(--muted)}
@@ -187,19 +195,29 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--pr
   .dash-topbar{padding:10px 12px}
   .dash-content{padding:12px}
   .login-card{padding:26px 16px}
-  .code-input-wrap{padding:24px 14px}
 }
 </style>
 </head>
-<body>
+<body oncontextmenu="return false">
 <div id="app">
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <h2>Chargement…</h2>
+</div>
+
+<!-- SETUP BANNER -->
+<div id="setup-banner">
+  ⚠️ Firebase non configuré — les données sont locales à votre navigateur. Ajoutez votre config Firebase dans le code.
+</div>
 
 <header class="site-header">
   <h1>Collège Artémis Marlyn</h1>
   <p>Bienvenue sur le portail des examens du Collège Artémis Marlyn. Retrouvez ici vos épreuves, résultats, convocations et informations importantes concernant les examens de l'année scolaire.</p>
 </header>
 
-<section id="login-section">
+<section id="login-section" style="display:none">
   <div class="login-card">
     <h2>Connexion</h2>
     <div class="form-group">
@@ -238,34 +256,129 @@ input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--pr
 
 <button id="view-btn" onclick="toggleView()" title="Vue mobile">📱</button>
 
-<script>
-// ══ DB ══════════════════════════════════════════
-let db={users:[],classes:[],exams:[],submissions:[]};
-let me=null, tab=0;
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-function loadDB(){
-  const s=localStorage.getItem('cam3');
-  if(s) db=JSON.parse(s);
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIGURATION FIREBASE
+//  ─────────────────────────────────────────────────────────────
+//  1. Allez sur https://console.firebase.google.com
+//  2. Créez un projet (ou utilisez un existant)
+//  3. Ajoutez une app Web → copiez la config ci-dessous
+//  4. Dans "Build > Realtime Database" → Créer la base
+//  5. Règles → copiez ceci et publiez :
+//     { "rules": { ".read": true, ".write": true } }
+//  6. Déployez votre index.html sur GitHub Pages
+// ══════════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "VOTRE_API_KEY",
+  authDomain:        "VOTRE_PROJET.firebaseapp.com",
+  databaseURL:       "https://VOTRE_PROJET-default-rtdb.firebaseio.com",
+  projectId:         "VOTRE_PROJET_ID",
+  storageBucket:     "VOTRE_PROJET.appspot.com",
+  messagingSenderId: "VOTRE_SENDER_ID",
+  appId:             "VOTRE_APP_ID"
+};
+// ══════════════════════════════════════════════════════════════
+
+const FB_READY = !FIREBASE_CONFIG.apiKey.startsWith('VOTRE');
+
+let fbDB = null;
+let db = {users:[], classes:[], exams:[], submissions:[]};
+let me = null, tab = 0;
+
+// ── Helpers Firebase ──────────────────────────────────────────
+function toObj(arr){
+  return arr.reduce((acc,item)=>{ acc[item.id]=item; return acc; }, {});
+}
+function fromSnap(data){
+  return data ? Object.values(data) : [];
+}
+
+async function loadDB(){
+  if(!FB_READY){
+    const s=localStorage.getItem('cam_local');
+    if(s) db=JSON.parse(s);
+    G('setup-banner').classList.add('show');
+    ensureAdmin(); return;
+  }
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbDB=firebase.database();
+    const snap=await fbDB.ref('/').once('value');
+    const data=snap.val()||{};
+    db={
+      users:      fromSnap(data.users),
+      classes:    fromSnap(data.classes),
+      exams:      fromSnap(data.exams),
+      submissions:fromSnap(data.submissions)
+    };
+    ensureAdmin();
+  }catch(e){
+    console.warn('Firebase error, fallback local',e);
+    const s=localStorage.getItem('cam_local');
+    if(s) db=JSON.parse(s);
+    G('setup-banner').classList.add('show');
+    ensureAdmin();
+  }
+}
+
+function ensureAdmin(){
   if(!db.users.find(u=>u.role==='admin')){
     db.users.push({id:uid(),username:'admin',password:'admin',role:'admin',nom:'Administrateur',prenom:''});
     save();
   }
 }
-function save(){ localStorage.setItem('cam3',JSON.stringify(db)); }
-function uid(){ return '_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function genCode(){
-  let c;
-  do{ c=Math.random().toString(36).slice(2,8).toUpperCase(); }
-  while(db.exams.find(e=>e.code===c));
-  return c;
+
+function save(){
+  if(fbDB){
+    fbDB.ref('/').set({
+      users:toObj(db.users),classes:toObj(db.classes),
+      exams:toObj(db.exams),submissions:toObj(db.submissions)
+    });
+  } else {
+    localStorage.setItem('cam_local',JSON.stringify(db));
+  }
 }
 
-// ══ AUTH ════════════════════════════════════════
-function doLogin(){
-  const u=V('l-user'),p=V('l-pass');
+// ── Reload fresh data before each login check ─────────────────
+async function freshLoad(){
+  if(!fbDB) return;
+  const snap=await fbDB.ref('/').once('value');
+  const data=snap.val()||{};
+  db={
+    users:      fromSnap(data.users),
+    classes:    fromSnap(data.classes),
+    exams:      fromSnap(data.exams),
+    submissions:fromSnap(data.submissions)
+  };
+}
+
+// ── Utils ──────────────────────────────────────────────────────
+function uid(){ return 'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function genCode(){
+  let c; do{ c=Math.random().toString(36).slice(2,8).toUpperCase(); }
+  while(db.exams.find(e=>e.code===c)); return c;
+}
+function G(id){ return document.getElementById(id); }
+function V(id){ const e=G(id); return e?e.value:''; }
+function S(id,v){ const e=G(id); if(!e)return; e.tagName==='INPUT'||e.tagName==='TEXTAREA'?e.value=v:e.textContent=v; }
+function show(id,d){ G(id).style.display=d||'block'; }
+function hide(id){ G(id).style.display='none'; }
+
+// ── AUTH ──────────────────────────────────────────────────────
+async function doLogin(){
+  const btn=document.querySelector('#login-section .btn');
+  btn.textContent='Vérification…'; btn.disabled=true;
+  await freshLoad(); // pull latest users from Firebase
+  const u=V('l-user'), p=V('l-pass');
   const user=db.users.find(x=>x.username===u&&x.password===p);
+  btn.textContent='Se connecter'; btn.disabled=false;
   if(!user){ S('l-err','Identifiants incorrects.'); return; }
-  me=user; sessionStorage.setItem('s',JSON.stringify(user)); showDash();
+  me=user; sessionStorage.setItem('s',JSON.stringify({id:user.id}));
+  showDash();
 }
 function doLogout(){
   me=null; sessionStorage.removeItem('s');
@@ -273,12 +386,12 @@ function doLogout(){
   S('l-user',''); S('l-pass',''); S('l-err','');
 }
 
-// ══ DASHBOARD ═══════════════════════════════════
+// ── DASHBOARD ─────────────────────────────────────────────────
 const TABS={
-  admin:['Utilisateurs','Classes','Examens','Résultats'],
-  proviseur:['Classes','Comptes','Examens','Résultats'],
-  professeur:['Mes Examens','Créer un Examen','Résultats'],
-  eleve:['Entrer un Code','Mes Résultats']
+  admin:      ['Utilisateurs','Classes','Examens','Résultats'],
+  proviseur:  ['Classes','Comptes','Examens','Résultats'],
+  professeur: ['Mes Examens','Créer un Examen','Résultats'],
+  eleve:      ['Entrer un Code','Mes Résultats']
 };
 const RL={admin:'Administrateur',proviseur:'Proviseur',professeur:'Professeur',eleve:'Élève'};
 
@@ -297,7 +410,7 @@ function go(i){
   ({admin:rAdmin,proviseur:rProv,professeur:rProf,eleve:rEleve}[me.role]||Function())(i);
 }
 
-// ══ ADMIN ════════════════════════════════════════
+// ── ADMIN ─────────────────────────────────────────────────────
 function rAdmin(i){
   const c=G('d-content');
   if(i===0){
@@ -329,7 +442,7 @@ function rAdmin(i){
   } else { rAllResults(c); }
 }
 
-// ══ PROVISEUR ════════════════════════════════════
+// ── PROVISEUR ─────────────────────────────────────────────────
 function rProv(i){
   const c=G('d-content');
   if(i===0){
@@ -370,29 +483,25 @@ function rProv(i){
   } else { rAllResults(c); }
 }
 
-// ══ PROFESSEUR ═══════════════════════════════════
+// ── PROFESSEUR ────────────────────────────────────────────────
 function rProf(i){
   const c=G('d-content');
   const myEx=db.exams.filter(e=>e.profId===me.id);
   const today=new Date().toISOString().slice(0,10);
-
   if(i===0){
     c.innerHTML=`<div class="sec-hdr"><h2>Mes Examens</h2>
       <button class="btn btn-primary btn-sm" onclick="go(1)">+ Créer un examen</button>
     </div>`;
     if(myEx.length===0){ c.innerHTML+=`<div class="empty"><div class="ico">📝</div><p>Aucun examen créé.</p></div>`; return; }
     c.innerHTML+=`<div class="tbl-wrap"><table>
-      <thead><tr><th>Titre</th><th>Code</th><th>Classe</th><th>Questions</th><th>Rendus</th><th>Date limite</th><th>Statut</th><th></th></tr></thead>
+      <thead><tr><th>Titre</th><th>Code</th><th>Classe</th><th>Q.</th><th>Rendus</th><th>Limite</th><th>Statut</th><th></th></tr></thead>
       <tbody>${myEx.map(e=>{
         const cl=db.classes.find(c=>c.id===e.classId);
         const exp=e.deadline<today;
         const subs=db.submissions.filter(s=>s.examId===e.id).length;
-        return `<tr>
-          <td><strong>${e.titre}</strong></td>
+        return `<tr><td><strong>${e.titre}</strong></td>
           <td><span class="code-badge">${e.code}</span></td>
-          <td>${cl?cl.nom:'—'}</td>
-          <td>${e.questions.length}</td>
-          <td>${subs}</td>
+          <td>${cl?cl.nom:'—'}</td><td>${e.questions.length}</td><td>${subs}</td>
           <td>${e.deadline}</td>
           <td><span class="badge ${exp?'b-err':'b-ok'}">${exp?'Expiré':'Actif'}</span></td>
           <td><button class="btn btn-danger btn-sm" onclick="delExam('${e.id}')">✕</button></td>
@@ -402,10 +511,8 @@ function rProf(i){
     window._qs=[]; window._choix=[];
     c.innerHTML=`<div class="sec-hdr"><h2>Créer un Examen</h2></div>
     <div class="card" style="max-width:720px">
-      <div style="display:grid;grid-template-columns:1fr;gap:0">
-        <div class="form-group"><label>Titre de l'examen</label>
-          <input type="text" id="ex-titre" placeholder="Ex : Contrôle de mathématiques"></div>
-      </div>
+      <div class="form-group"><label>Titre de l'examen</label>
+        <input type="text" id="ex-titre" placeholder="Ex : Contrôle de mathématiques"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="form-group"><label>Classe</label><select id="ex-class">
           <option value="">-- Sélectionner --</option>
@@ -418,29 +525,21 @@ function rProf(i){
       <p style="font-weight:700;font-size:.88rem;margin-bottom:12px">➕ Ajouter une question</p>
       <div class="add-q-box">
         <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;align-items:end;margin-bottom:10px">
-          <div class="form-group" style="margin:0">
-            <label>Type</label>
+          <div class="form-group" style="margin:0"><label>Type</label>
             <select id="nq-type" onchange="switchQType()">
               <option value="vf">Vrai / Faux</option>
               <option value="qcm">QCM</option>
-            </select>
-          </div>
-          <div class="form-group" style="margin:0">
-            <label>Énoncé de la question</label>
-            <input type="text" id="nq-txt" placeholder="Tapez votre question...">
-          </div>
+            </select></div>
+          <div class="form-group" style="margin:0"><label>Énoncé</label>
+            <input type="text" id="nq-txt" placeholder="Tapez votre question..."></div>
         </div>
-        <!-- VF -->
         <div id="vf-sec">
-          <div class="form-group" style="margin-bottom:0">
-            <label>Bonne réponse</label>
+          <div class="form-group" style="margin-bottom:0"><label>Bonne réponse</label>
             <select id="nq-vf" style="width:auto;min-width:140px">
               <option value="true">✅ Vrai</option>
               <option value="false">❌ Faux</option>
-            </select>
-          </div>
+            </select></div>
         </div>
-        <!-- QCM -->
         <div id="qcm-sec" style="display:none">
           <label style="display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Choix de réponses</label>
           <div id="choix-list"></div>
@@ -450,10 +549,8 @@ function rProf(i){
               onkeydown="if(event.key==='Enter') addChoix()">
             <button class="btn btn-secondary btn-sm" onclick="addChoix()">+ Ajouter</button>
           </div>
-          <div class="form-group" style="margin-bottom:0">
-            <label>Bonne réponse</label>
-            <select id="nq-correct"><option value="">-- sélectionner --</option></select>
-          </div>
+          <div class="form-group" style="margin-bottom:0"><label>Bonne réponse</label>
+            <select id="nq-correct"><option value="">-- sélectionner --</option></select></div>
         </div>
         <button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="addQ()">✔ Valider la question</button>
       </div>
@@ -486,7 +583,7 @@ function rProf(i){
   }
 }
 
-// ══ ÉLÈVE ════════════════════════════════════════
+// ── ÉLÈVE ─────────────────────────────────────────────────────
 function rEleve(i){
   const c=G('d-content');
   if(i===0){
@@ -500,7 +597,7 @@ function rEleve(i){
           onkeydown="if(event.key==='Enter') enterCode()">
         <button class="btn btn-primary" onclick="enterCode()">Accéder</button>
       </div>
-      <p class="code-err" id="code-err"></p>
+      <p id="code-err" style="font-size:.81rem;margin-top:10px;min-height:16px"></p>
     </div>`;
   } else {
     c.innerHTML=`<div class="sec-hdr"><h2>Mes Résultats</h2></div>`;
@@ -508,8 +605,7 @@ function rEleve(i){
     if(subs.length===0){ c.innerHTML+=`<div class="empty"><div class="ico">📊</div><p>Aucun résultat.</p></div>`; return; }
     c.innerHTML+=`<div class="tbl-wrap"><table>
       <thead><tr><th>Examen</th><th>Code</th><th>Note</th><th>Date</th></tr></thead>
-      <tbody>${subs.map(s=>{
-        const ex=db.exams.find(e=>e.id===s.examId);
+      <tbody>${subs.map(s=>{const ex=db.exams.find(e=>e.id===s.examId);
         return `<tr><td>${ex?ex.titre:'—'}</td>
         <td>${ex?`<span class="code-badge">${ex.code}</span>`:'—'}</td>
         <td><span class="score-big">${s.score}/${s.total}</span></td>
@@ -518,21 +614,19 @@ function rEleve(i){
   }
 }
 
-function enterCode(){
+async function enterCode(){
   const code=V('exam-code').trim().toUpperCase();
   const err=G('code-err');
   err.style.color='var(--danger)';
   if(!code){ err.textContent='Entrez un code.'; return; }
+  // Reload fresh data to get latest exams
+  await freshLoad();
   const ex=db.exams.find(e=>e.code===code);
   if(!ex){ err.textContent='Code invalide.'; return; }
   const today=new Date().toISOString().slice(0,10);
   if(ex.deadline<today){ err.textContent='Cet examen est expiré.'; return; }
   const done=db.submissions.find(s=>s.examId===ex.id&&s.studentId===me.id);
-  if(done){
-    err.style.color='var(--success)';
-    err.textContent=`Déjà rendu — Note : ${done.score}/${done.total}`;
-    return;
-  }
+  if(done){ err.style.color='var(--success)'; err.textContent=`Déjà rendu — Note : ${done.score}/${done.total}`; return; }
   startExam(ex);
 }
 
@@ -541,27 +635,21 @@ function startExam(ex){
   const c=G('d-content');
   c.innerHTML=`
   <div class="exam-container">
-    <div class="sec-hdr">
-      <h2>📝 ${ex.titre}</h2>
-      <span class="code-badge">${ex.code}</span>
-    </div>
+    <div class="sec-hdr"><h2>📝 ${ex.titre}</h2><span class="code-badge">${ex.code}</span></div>
     <p style="color:var(--muted);font-size:.81rem;margin-bottom:18px">
-      ${ex.questions.length} question(s) · Limite : ${ex.deadline}
-    </p>
+      ${ex.questions.length} question(s) · Limite : ${ex.deadline}</p>
     ${ex.questions.map((q,i)=>`
     <div class="exam-q-block">
-      <div class="q-num">
-        Question ${i+1}/${ex.questions.length}
+      <div class="q-num">Question ${i+1}/${ex.questions.length}
         <span class="q-type-tag ${q.type==='vf'?'tag-vf':'tag-qcm'}">${q.type==='vf'?'Vrai/Faux':'QCM'}</span>
       </div>
       <div class="exam-q-txt">${q.enonce}</div>
       <div class="ans-row">
         ${q.type==='vf'
-          ? `<button class="ans-btn" id="a-${q.id}-T" onclick="pickAns('${q.id}',true,'vf')">✅ Vrai</button>
-             <button class="ans-btn" id="a-${q.id}-F" onclick="pickAns('${q.id}',false,'vf')">❌ Faux</button>`
-          : q.choix.map(ch=>`<button class="ans-btn" id="a-${q.id}-${ch.id}"
-              onclick="pickAns('${q.id}','${ch.id}','qcm',[${q.choix.map(x=>`'${x.id}'`).join(',')}])"
-              >${ch.texte}</button>`).join('')
+          ?`<button class="ans-btn" id="a-${q.id}-T" onclick="pickAns('${q.id}',true,'vf')">✅ Vrai</button>
+            <button class="ans-btn" id="a-${q.id}-F" onclick="pickAns('${q.id}',false,'vf')">❌ Faux</button>`
+          :q.choix.map(ch=>`<button class="ans-btn" id="a-${q.id}-${ch.id}"
+              onclick="pickAns('${q.id}','${ch.id}','qcm',[${q.choix.map(x=>`'${x.id}'`).join(',')}])">${ch.texte}</button>`).join('')
         }
       </div>
     </div>`).join('')}
@@ -591,12 +679,11 @@ function submitExam(){
   db.submissions.push({id:uid(),examId:ex.id,studentId:me.id,
     score:correct,total:ex.questions.length,date:new Date().toISOString().slice(0,10)});
   save();
-  const c=G('d-content');
-  c.innerHTML=`
+  G('d-content').innerHTML=`
   <div class="result-box">
     <div style="font-size:2.5rem;margin-bottom:10px">🎉</div>
     <div class="result-score">${correct} / ${ex.questions.length}</div>
-    <div class="result-label" style="margin-bottom:20px">Votre note pour "${ex.titre}"</div>
+    <div style="font-size:.83rem;color:var(--muted);margin-bottom:20px">Votre note pour "${ex.titre}"</div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-secondary btn-sm" onclick="go(0)">← Nouvel examen</button>
       <button class="btn btn-primary btn-sm" onclick="go(1)">Mes résultats</button>
@@ -604,26 +691,23 @@ function submitExam(){
   </div>`;
 }
 
-// ══ HELPERS ══════════════════════════════════════
+// ── HELPERS ───────────────────────────────────────────────────
 function rExamsTable(c,exams,showProf,canDel){
   const today=new Date().toISOString().slice(0,10);
   c.innerHTML+=`<div class="sec-hdr"><h2>Examens (${exams.length})</h2></div>
   <div class="tbl-wrap"><table>
     <thead><tr><th>Titre</th><th>Code</th>${showProf?'<th>Professeur</th>':''}
-      <th>Classe</th><th>Q.</th><th>Date limite</th><th>Statut</th>${canDel?'<th></th>':''}
+      <th>Classe</th><th>Q.</th><th>Limite</th><th>Statut</th>${canDel?'<th></th>':''}
     </tr></thead>
     <tbody>${exams.length===0?`<tr><td colspan="8" style="text-align:center;color:#aaa">Aucun examen</td></tr>`:
       exams.map(e=>{
         const cl=db.classes.find(c=>c.id===e.classId);
         const prof=db.users.find(u=>u.id===e.profId);
         const exp=e.deadline<today;
-        return `<tr>
-          <td>${e.titre}</td>
+        return `<tr><td>${e.titre}</td>
           <td><span class="code-badge">${e.code||'—'}</span></td>
           ${showProf?`<td>${prof?prof.nom+' '+prof.prenom:'—'}</td>`:''}
-          <td>${cl?cl.nom:'—'}</td>
-          <td>${e.questions.length}</td>
-          <td>${e.deadline}</td>
+          <td>${cl?cl.nom:'—'}</td><td>${e.questions.length}</td><td>${e.deadline}</td>
           <td><span class="badge ${exp?'b-err':'b-ok'}">${exp?'Expiré':'Actif'}</span></td>
           ${canDel?`<td><button class="btn btn-danger btn-sm" onclick="delExam('${e.id}')">Supprimer</button></td>`:''}
         </tr>`;}).join('')}
@@ -645,7 +729,7 @@ function rAllResults(c){
     </tbody></table></div>`;
 }
 
-// ══ MODALS ════════════════════════════════════════
+// ── MODALS ────────────────────────────────────────────────────
 function openModal(html,wide){
   const b=G('m-box'); b.className='modal'+(wide?' modal-wide':''); b.innerHTML=html;
   G('m-overlay').classList.add('open');
@@ -659,19 +743,19 @@ function mCreateUser(roles){
       ${roles.map(r=>`<option value="${r}">${RL[r]}</option>`).join('')}</select></div>
     <div class="form-group"><label>Nom</label><input type="text" id="m-nom" placeholder="Nom de famille"></div>
     <div class="form-group"><label>Prénom</label><input type="text" id="m-prenom" placeholder="Prénom"></div>
-    <div class="form-group"><label>Identifiant</label><input type="text" id="m-user" placeholder="Login de connexion"></div>
+    <div class="form-group"><label>Identifiant de connexion</label><input type="text" id="m-user" placeholder="Login unique"></div>
     <div class="form-group"><label>Mot de passe</label><input type="password" id="m-pass"></div>
     <p id="m-err" class="m-error"></p>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="doCreateUser()">Créer</button>
+      <button class="btn btn-primary" onclick="doCreateUser()">Créer le compte</button>
     </div>`);
 }
 function doCreateUser(){
   const role=V('m-role'),nom=V('m-nom').trim(),prenom=V('m-prenom').trim();
-  const username=V('m-user').trim(),password=V('m-pass');
+  const username=V('m-user').trim().toLowerCase(),password=V('m-pass');
   if(!nom||!prenom||!username||!password){ S('m-err','Tous les champs sont requis.'); return; }
-  if(db.users.find(u=>u.username===username)){ S('m-err','Identifiant déjà utilisé.'); return; }
+  if(db.users.find(u=>u.username===username)){ S('m-err','Cet identifiant est déjà utilisé.'); return; }
   db.users.push({id:uid(),username,password,role,nom,prenom});
   save(); closeModal(); go(tab);
 }
@@ -681,7 +765,6 @@ function delUser(id){
   db.classes.forEach(c=>{ c.studentIds=c.studentIds.filter(s=>s!==id); });
   save(); go(tab);
 }
-
 function mCreateClass(){
   openModal(`<h3>Créer une classe</h3>
     <div class="form-group"><label>Nom de la classe</label>
@@ -704,7 +787,6 @@ function delClass(id){
   db.classes=db.classes.filter(c=>c.id!==id);
   save(); go(tab);
 }
-
 function mManageClass(cid){
   const cl=db.classes.find(c=>c.id===cid);
   const all=db.users.filter(u=>u.role==='eleve');
@@ -731,7 +813,7 @@ function doManageClass(cid){
   save(); closeModal(); go(tab);
 }
 
-// ══ EXAM BUILDER ═════════════════════════════════
+// ── EXAM BUILDER ──────────────────────────────────────────────
 function switchQType(){
   const t=V('nq-type');
   G('vf-sec').style.display=t==='vf'?'':'none';
@@ -782,9 +864,7 @@ function rQList(){
         <span class="q-txt" style="margin:0">${i+1}. ${q.enonce}</span>
       </div>
       <div class="q-meta">
-        <span style="color:var(--muted)">✔ Réponse :
-          <strong style="color:var(--primary)">${q.type==='vf'?(q.reponse?'Vrai':'Faux'):(q.choix.find(c=>c.id===q.reponse)||{texte:'?'}).texte}</strong>
-        </span>
+        <span style="color:var(--muted)">✔ <strong style="color:var(--primary)">${q.type==='vf'?(q.reponse?'Vrai':'Faux'):(q.choix.find(c=>c.id===q.reponse)||{texte:'?'}).texte}</strong></span>
         ${q.type==='qcm'?`<span style="color:#aaa">[${q.choix.map(c=>c.texte).join(' / ')}]</span>`:''}
         <button class="btn btn-danger btn-sm" onclick="removeQ(${i})">✕</button>
       </div>
@@ -810,31 +890,58 @@ function delExam(id){
   save(); go(tab);
 }
 
-// ══ VIEW TOGGLE ═══════════════════════════════════
+// ── VIEW TOGGLE ───────────────────────────────────────────────
 let mobileMode=false;
 function toggleView(){
   mobileMode=!mobileMode;
   document.body.classList.toggle('mobile-view',mobileMode);
   G('view-btn').textContent=mobileMode?'🖥️':'📱';
-  G('view-btn').title=mobileMode?'Vue PC':'Vue mobile';
 }
 
-// ══ DOM UTILS ═════════════════════════════════════
-function G(id){ return document.getElementById(id); }
-function V(id){ const e=G(id); return e?e.value:''; }
-function S(id,v){ const e=G(id); if(!e) return; if(e.tagName==='INPUT'||e.tagName==='TEXTAREA') e.value=v; else e.textContent=v; }
-function show(id,d){ G(id).style.display=d||'block'; }
-function hide(id){ G(id).style.display='none'; }
+// ── ANTI DEVTOOLS ─────────────────────────────────────────────
+document.addEventListener('keydown',function(e){
+  // F12
+  if(e.key==='F12'||e.keyCode===123){ e.preventDefault(); e.stopPropagation(); return false; }
+  // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+  if(e.ctrlKey&&e.shiftKey&&['I','i','J','j','C','c'].includes(e.key)){ e.preventDefault(); e.stopPropagation(); return false; }
+  // Ctrl+U (view source)
+  if(e.ctrlKey&&(e.key==='u'||e.key==='U')){ e.preventDefault(); e.stopPropagation(); return false; }
+  // Ctrl+S (save source)
+  if(e.ctrlKey&&(e.key==='s'||e.key==='S')){ e.preventDefault(); return false; }
+},true);
 
-// ══ INIT ══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded',()=>{
-  loadDB();
+// Devtools size detection — blur page if opened
+(function devtoolsDetect(){
+  const threshold=160;
+  setInterval(()=>{
+    const wDiff=window.outerWidth-window.innerWidth;
+    const hDiff=window.outerHeight-window.innerHeight;
+    if(wDiff>threshold||hDiff>threshold){
+      document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;font-size:1.2rem;color:#c62828">⛔ Accès aux outils de développement interdit.</div>';
+    }
+  },800);
+})();
+
+// ── INIT ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',async ()=>{
+  G('loading-screen').classList.remove('hidden');
+  await loadDB();
+  G('loading-screen').classList.add('hidden');
+
   const s=sessionStorage.getItem('s');
-  if(s){ const sv=JSON.parse(s); const fr=db.users.find(u=>u.id===sv.id);
-    if(fr){ me=fr; showDash(); } else doLogout(); }
+  if(s){
+    const sv=JSON.parse(s);
+    // Always reload fresh user from DB (ensures deleted accounts can't log back in)
+    await freshLoad();
+    const fresh=db.users.find(u=>u.id===sv.id);
+    if(fresh){ me=fresh; showDash(); }
+    else { sessionStorage.removeItem('s'); show('login-section','flex'); }
+  } else {
+    show('login-section','flex');
+  }
+
   ['l-pass','l-user'].forEach(id=>G(id).addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); }));
 });
 </script>
 </body>
 </html>
-<!-- Fait & dev par Atyx, tout droit reserver -->
